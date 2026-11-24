@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Create Blog</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 700px;
+        margin: 30px auto;
+        padding: 0 15px;
+      }
+      input, textarea, select, button {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        font-family: inherit;
+      }
+      textarea { height: 200px; }
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      a { color: #2563eb; }
+      #msg { margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <a href="blogs.html">&larr; All blogs</a> |
+    <a href="dashboard.html">My blogs</a>
+    <h1>Create a New Blog</h1>
+
+    <form onsubmit="createBlog(event)">
+      <input id="title" placeholder="Blog title" required />
+      <select id="category">
+        <option value="general">General</option>
+        <option value="tech">Tech</option>
+        <option value="lifestyle">Lifestyle</option>
+        <option value="education">Education</option>
+        <option value="travel">Travel</option>
+        <option value="food">Food</option>
+        <option value="other">Other</option>
+      </select>
+      <textarea id="content" placeholder="Write your blog content..." required></textarea>
+      <button type="submit">Create Blog</button>
+    </form>
+    <div id="msg"></div>
+
+    <script>
+      const API_URL = "http://localhost:5000/api";
+
+      async function createBlog(e) {
+        e.preventDefault();
+        const msg = document.getElementById("msg");
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          msg.innerHTML = "<p style='color:red'>Please login first.</p>";
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/blogs`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: document.getElementById("title").value,
+            content: document.getElementById("content").value,
+            category: document.getElementById("category").value,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          msg.innerHTML = "<p style='color:green'>Blog created!</p>";
+          setTimeout(() => (window.location.href = "dashboard.html"), 800);
+        } else {
+          msg.innerHTML = `<p style='color:red'>${data.message || "Failed"}</p>`;
+        }
+      }
+    </script>
+  </body>
+</html>

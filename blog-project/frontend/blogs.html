@@ -10,6 +10,16 @@
         margin: 30px auto;
         padding: 0 15px;
       }
+      .filters {
+        display: flex;
+        gap: 10px;
+        margin: 15px 0;
+      }
+      .filters input {
+        flex: 1;
+        padding: 8px;
+      }
+      .filters select, .filters button { padding: 8px; }
       .blog-card {
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -21,33 +31,66 @@
         text-decoration: none;
         font-weight: bold;
       }
-      .meta {
-        color: #666;
-        font-size: 0.85rem;
+      .meta { color: #666; font-size: 0.85rem; }
+      .snippet { color: #333; margin-top: 8px; }
+      .cat-tag {
+        display: inline-block;
+        background: #e5e7eb;
+        border-radius: 10px;
+        padding: 2px 10px;
+        font-size: 0.75rem;
+        color: #374151;
       }
-      .snippet {
-        color: #333;
-        margin-top: 8px;
-      }
+      a { color: #2563eb; }
     </style>
   </head>
   <body>
     <h1>All Blogs</h1>
-    <a href="index.html">&larr; Back to login</a>
+    <a href="index.html">Login</a> |
+    <a href="dashboard.html">My blogs</a> |
+    <a href="create.html">New blog</a>
+
+    <div class="filters">
+      <input id="search" placeholder="Search blogs..." oninput="debouncedLoad()" />
+      <select id="category" onchange="loadBlogs()">
+        <option value="">All categories</option>
+        <option value="general">General</option>
+        <option value="tech">Tech</option>
+        <option value="lifestyle">Lifestyle</option>
+        <option value="education">Education</option>
+        <option value="travel">Travel</option>
+        <option value="food">Food</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
     <div id="blogs-list">Loading blogs...</div>
 
     <script>
       const API_URL = "http://localhost:5000/api";
+      let debounceTimer;
+
+      function debouncedLoad() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(loadBlogs, 300); // wait for typing to pause
+      }
 
       async function loadBlogs() {
         const container = document.getElementById("blogs-list");
+        const search = document.getElementById("search").value.trim();
+        const category = document.getElementById("category").value;
+
+        const params = new URLSearchParams();
+        if (search) params.set("search", search);
+        if (category) params.set("category", category);
 
         try {
-          const response = await fetch(`${API_URL}/blogs`);
+          const response = await fetch(`${API_URL}/blogs?${params}`);
           const data = await response.json();
 
           if (!data.blogs || data.blogs.length === 0) {
-            container.innerHTML = "<p>No blogs yet. Be the first to post!</p>";
+            container.innerHTML =
+              "<p>No blogs match your search. Try different keywords.</p>";
             return;
           }
 
@@ -60,6 +103,7 @@
               return `
                 <div class="blog-card">
                   <a href="blog.html?id=${blog._id}">${blog.title}</a>
+                  <span class="cat-tag">${blog.category || "general"}</span>
                   <div class="meta">
                     By ${blog.author ? blog.author.name : "Unknown"} |
                     ${new Date(blog.createdAt).toLocaleDateString()}

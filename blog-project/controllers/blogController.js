@@ -17,6 +17,7 @@ exports.createBlog = async (req, res) => {
     const blog = await Blog.create({
       title,
       content,
+      category: req.body.category,
       author: req.user.id,
     });
 
@@ -30,10 +31,39 @@ exports.createBlog = async (req, res) => {
 };
 
 // ------------------- GET /api/blogs -------------------
+// Optional query params:  ?search=keyword  &  ?category=tech
 exports.getBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find().populate("author", "name email");
+    const { search, category } = req.query;
+
+    const filter = {};
+    if (category) {
+      filter.category = category.toLowerCase();
+    }
+    if (search) {
+      // Case-insensitive match on title OR content
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [{ title: regex }, { content: regex }];
+    }
+
+    const blogs = await Blog.find(filter)
+      .populate("author", "name email")
+      .sort({ createdAt: -1 });
     res.json({ message: "All blogs", count: blogs.length, blogs });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// ------------------- GET /api/blogs/my -------------------
+// Blogs belonging to the logged-in user (protected)
+
+exports.getMyBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find({ author: req.user.id })
+      .populate("author", "name email")
+      .sort({ createdAt: -1 });
+    res.json({ message: "My blogs", count: blogs.length, blogs });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
@@ -65,7 +95,11 @@ exports.updateBlog = async (req, res) => {
   try {
     const blog = await Blog.findOneAndUpdate(
       { _id: req.params.id, author: req.user.id }, // only the author can update
-      { title: req.body.title, content: req.body.content },
+      {
+        title: req.body.title,
+        content: req.body.content,
+        category: req.body.category,
+      },
       { new: true, runValidators: true },
     );
 
