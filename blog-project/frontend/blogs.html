@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>All Blogs</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 0 15px;
+      }
+      .blog-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+      }
+      .blog-card a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .meta {
+        color: #666;
+        font-size: 0.85rem;
+      }
+      .snippet {
+        color: #333;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>All Blogs</h1>
+    <a href="index.html">&larr; Back to login</a>
+    <div id="blogs-list">Loading blogs...</div>
+
+    <script>
+      const API_URL = "http://localhost:5000/api";
+
+      async function loadBlogs() {
+        const container = document.getElementById("blogs-list");
+
+        try {
+          const response = await fetch(`${API_URL}/blogs`);
+          const data = await response.json();
+
+          if (!data.blogs || data.blogs.length === 0) {
+            container.innerHTML = "<p>No blogs yet. Be the first to post!</p>";
+            return;
+          }
+
+          container.innerHTML = data.blogs
+            .map((blog) => {
+              const snippet =
+                blog.content.length > 150
+                  ? blog.content.slice(0, 150) + "..."
+                  : blog.content;
+              return `
+                <div class="blog-card">
+                  <a href="blog.html?id=${blog._id}">${blog.title}</a>
+                  <div class="meta">
+                    By ${blog.author ? blog.author.name : "Unknown"} |
+                    ${new Date(blog.createdAt).toLocaleDateString()}
+                  </div>
+                  <p class="snippet">${snippet}</p>
+                </div>
+              `;
+            })
+            .join("");
+        } catch (err) {
+          container.innerHTML =
+            "<p style='color:red'>Failed to load blogs. Is the server running?</p>";
+        }
+      }
+
+      loadBlogs();
+    </script>
+  </body>
+</html>

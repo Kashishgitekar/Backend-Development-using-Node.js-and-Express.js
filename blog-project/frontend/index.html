@@ -1,62 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Blog Project - Frontend Demo</title>
-</head>
-<body>
+  </head>
+  <body>
     <h2>User Login</h2>
-    <input id="email" placeholder="Enter email">
-    <input id="password" type="password" placeholder="Enter password">
+    <input id="email" placeholder="Enter email" />
+    <input id="password" type="password" placeholder="Enter password" />
     <button onclick="login()">Login</button>
 
     <h2>User Registration</h2>
-    <input id="reg-name" placeholder="Enter name">
-    <input id="reg-email" placeholder="Enter email">
-    <input id="reg-password" type="password" placeholder="Enter password">
+    <input id="reg-name" placeholder="Enter name" />
+    <input id="reg-email" placeholder="Enter email" />
+    <input id="reg-password" type="password" placeholder="Enter password" />
     <button onclick="register()">Register</button>
 
+    <h2>Blogs</h2>
+    <a href="blogs.html">View all blogs</a>
+
     <script>
-        const API_URL = "http://localhost:5000/api";
+      const API_URL = "http://localhost:5000/api";
 
-        async function register() {
-            const response = await fetch(`${API_URL}/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: document.getElementById("reg-name").value,
-                    email: document.getElementById("reg-email").value,
-                    password: document.getElementById("reg-password").value
-                })
-            });
+      async function register() {
+        const response = await fetch(`${API_URL}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: document.getElementById("reg-name").value,
+            email: document.getElementById("reg-email").value,
+            password: document.getElementById("reg-password").value,
+          }),
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (data.token) {
-                localStorage.setItem("token", data.token);
-            }
-
-            alert(data.message);
+        if (data.token) {
+          localStorage.setItem("token", data.token);
         }
 
-        async function login() {
-            const response = await fetch(`${API_URL}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: document.getElementById("email").value,
-                    password: document.getElementById("password").value
-                })
-            });
+        alert(data.message);
+      }
 
-            const data = await response.json();
+      async function login() {
+        const response = await fetch(`${API_URL}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value,
+          }),
+        });
 
-            if (data.token) {
-                localStorage.setItem("token", data.token);
-            }
+        const data = await response.json();
 
-            alert(data.message);
+        if (data.token) {
+          localStorage.setItem("token", data.token);
         }
+
+        alert(data.message);
+      }
     </script>
-</body>
+  </body>
 </html>
