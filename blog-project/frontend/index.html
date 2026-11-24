@@ -2,27 +2,53 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Blog Project - Frontend Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog App — Login</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h2>User Login</h2>
-    <input id="email" placeholder="Enter email" />
-    <input id="password" type="password" placeholder="Enter password" />
-    <button onclick="login()">Login</button>
+    <nav class="topnav">
+      <span class="brand">📝 My Blog</span>
+      <a href="blogs.html">All blogs</a>
+    </nav>
 
-    <h2>User Registration</h2>
-    <input id="reg-name" placeholder="Enter name" />
-    <input id="reg-email" placeholder="Enter email" />
-    <input id="reg-password" type="password" placeholder="Enter password" />
-    <button onclick="register()">Register</button>
+    <h1>Welcome to My Blog</h1>
 
-    <h2>Blogs</h2>
-    <a href="blogs.html">View all blogs</a>
+    <div class="card">
+      <h2>Login</h2>
+      <form onsubmit="login(event)">
+        <input id="email" type="email" placeholder="Enter email" required />
+        <input id="password" type="password" placeholder="Enter password" required />
+        <button type="submit" class="btn-submit">Login</button>
+      </form>
+    </div>
 
+    <div class="card">
+      <h2>Register</h2>
+      <form onsubmit="register(event)">
+        <input id="reg-name" placeholder="Enter name" required />
+        <input id="reg-email" type="email" placeholder="Enter email" required />
+        <input id="reg-password" type="password" placeholder="Password (min 6 chars)" minlength="6" required />
+        <button type="submit" class="btn-submit">Register</button>
+      </form>
+    </div>
+
+    <div id="msg"></div>
+
+    <script src="config.js"></script>
     <script>
-      const API_URL = "http://localhost:5000/api";
+      function saveToken(data) {
+        if (data.token) localStorage.setItem("token", data.token);
+      }
 
-      async function register() {
+      function showMsg(text, ok) {
+        document.getElementById("msg").innerHTML = ok
+          ? `<div class="alert-success">${esc(text)}</div>`
+          : `<div class="alert-error">${esc(text)}</div>`;
+      }
+
+      async function register(e) {
+        e.preventDefault();
         const response = await fetch(`${API_URL}/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -34,15 +60,16 @@
         });
 
         const data = await response.json();
+        saveToken(data);
+        showMsg(data.message, response.ok);
 
-        if (data.token) {
-          localStorage.setItem("token", data.token);
+        if (response.ok) {
+          setTimeout(() => (window.location.href = "blogs.html"), 800);
         }
-
-        alert(data.message);
       }
 
-      async function login() {
+      async function login(e) {
+        e.preventDefault();
         const response = await fetch(`${API_URL}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -53,12 +80,12 @@
         });
 
         const data = await response.json();
+        saveToken(data);
+        showMsg(data.message, response.ok);
 
-        if (data.token) {
-          localStorage.setItem("token", data.token);
+        if (response.ok) {
+          setTimeout(() => (window.location.href = "dashboard.html"), 800);
         }
-
-        alert(data.message);
       }
     </script>
   </body>

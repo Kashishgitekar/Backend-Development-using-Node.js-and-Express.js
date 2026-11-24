@@ -1,136 +1,105 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>My Blogs Dashboard</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 30px auto;
-        padding: 0 15px;
-      }
-      .blog-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px 20px;
-        margin-bottom: 15px;
-      }
-      .blog-card h3 { margin: 0 0 5px; }
-      .meta { color: #666; font-size: 0.85rem; }
-      .snippet { color: #333; margin-top: 8px; }
-      .btn {
-        display: inline-block;
-        padding: 6px 12px;
-        margin-right: 6px;
-        border-radius: 5px;
-        text-decoration: none;
-        font-size: 0.85rem;
-        border: none;
-        cursor: pointer;
-      }
-      .btn-view { background: #2563eb; color: white; }
-      .btn-edit { background: #f59e0b; color: white; }
-      .btn-delete { background: #dc2626; color: white; }
-      .btn-create { background: #16a34a; color: white; padding: 10px 16px; }
-      .cat-tag {
-        display: inline-block;
-        background: #e5e7eb;
-        border-radius: 10px;
-        padding: 2px 10px;
-        font-size: 0.75rem;
-        color: #374151;
-      }
-      a { color: #2563eb; }
-      #msg { margin-top: 10px; }
-    </style>
-  </head>
-  <body>
-    <a href="blogs.html">&larr; All blogs</a>
-    <h1>My Blogs Dashboard</h1>
-    <a href="create.html" class="btn btn-create">+ New Blog</a>
-    <div id="msg"></div>
-    <div id="blogs-list">Loading your blogs...</div>
 
-    <script>
-      const API_URL = "http://localhost:5000/api";
-      const token = localStorage.getItem("token");
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Blogs Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-      async function loadMyBlogs() {
-        const container = document.getElementById("blogs-list");
-        const msg = document.getElementById("msg");
+<body>
+  <nav class="topnav">
+    <span class="brand">📝 My Blog</span>
+    <a href="blogs.html">All blogs</a>
+    <a href="create.html">New blog</a>
+  </nav>
+  <h1>My Blogs Dashboard</h1>
+  <a href="create.html" class="btn btn-create">+ New Blog</a>
+  <div id="msg"></div>
+  <div id="blogs-list"><div class="empty">Loading your blogs...</div></div>
 
-        if (!token) {
+  <script src="config.js"></script>
+  <script>
+    const token = localStorage.getItem("token");
+
+    async function loadMyBlogs() {
+      const container = document.getElementById("blogs-list");
+      const msg = document.getElementById("msg");
+
+      if (!token) {
+        container.innerHTML =
+          '<div class="empty alert-error">Please login first.</div>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/blogs/my`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
           container.innerHTML =
-            "<p style='color:red'>Please login first.</p>";
+            `<div class="empty alert-error">${esc(data.message || "Failed to load.")}</div>`;
           return;
         }
 
-        try {
-          const response = await fetch(`${API_URL}/blogs/my`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+        const data = await response.json();
 
-          if (!response.ok) {
-            const data = await response.json();
-            container.innerHTML =
-              `<p style='color:red'>${data.message || "Failed to load."}</p>`;
-            return;
-          }
+        if (data.blogs.length === 0) {
+          container.innerHTML =
+            '<div class="empty">You haven\'t written any blogs yet. <a href="create.html">Write your first one!</a></div>';
+          return;
+        }
 
-          const data = await response.json();
-
-          if (data.blogs.length === 0) {
-            container.innerHTML = "<p>You haven't written any blogs yet.</p>";
-            return;
-          }
-
-          container.innerHTML = data.blogs
-            .map((blog) => {
-              const snippet =
-                blog.content.length > 150
-                  ? blog.content.slice(0, 150) + "..."
-                  : blog.content;
-              return `
-                <div class="blog-card">
-                  <h3>${blog.title} <span class="cat-tag">${blog.category || "general"}</span></h3>
+        container.innerHTML = data.blogs
+          .map((blog) => {
+            const snippet =
+              blog.content.length > 150
+                ? blog.content.slice(0, 150) + "..."
+                : blog.content;
+            return `
+                <div class="card">
+                  <h3>${esc(blog.title)} <span class="cat-tag">${esc(blog.category || "general")}</span></h3>
                   <div class="meta">
                     ${new Date(blog.createdAt).toLocaleString()}
                   </div>
-                  <p class="snippet">${snippet}</p>
+                  <p class="snippet">${esc(snippet)}</p>
                   <a class="btn btn-view" href="blog.html?id=${blog._id}">View</a>
                   <a class="btn btn-edit" href="edit.html?id=${blog._id}">Edit</a>
                   <button class="btn btn-delete" onclick="deleteBlog('${blog._id}')">Delete</button>
                 </div>
               `;
-            })
-            .join("");
-        } catch (err) {
-          container.innerHTML =
-            "<p style='color:red'>Failed to load. Is the server running?</p>";
-        }
+          })
+          .join("");
+      } catch (err) {
+        container.innerHTML =
+          '<div class="empty alert-error">Failed to load. Is the server running?</div>';
       }
+    }
 
-      async function deleteBlog(id) {
-        if (!confirm("Delete this blog permanently?")) return;
+    async function deleteBlog(id) {
+      if (!confirm("Delete this blog permanently?")) return;
 
-        const response = await fetch(`${API_URL}/blogs/${id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      const response = await fetch(`${API_URL}/blogs/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        if (response.ok) {
-          document.getElementById("msg").innerHTML =
-            "<p style='color:green'>Blog deleted.</p>";
-          loadMyBlogs(); // refresh the list
-        } else {
-          const data = await response.json();
-          document.getElementById("msg").innerHTML =
-            `<p style='color:red'>${data.message || "Delete failed."}</p>`;
-        }
+      if (response.ok) {
+        document.getElementById("msg").innerHTML =
+          '<div class="alert-success">Blog deleted.</div>';
+        loadMyBlogs(); // refresh the list
+      } else {
+        const data = await response.json();
+        document.getElementById("msg").innerHTML =
+          `<div class="alert-error">${esc(data.message || "Delete failed.")}</div>`;
       }
+    }
 
-      loadMyBlogs();
-    </script>
-  </body>
+    loadMyBlogs();
+  </script>
+</body>
+
 </html>

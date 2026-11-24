@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: blog-project
+    runtime: node
+    rootDir: blog-project
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false   # set in the Render dashboard (MongoDB Atlas URI)
+      - key: JWT_SECRET
+        generateValue: true

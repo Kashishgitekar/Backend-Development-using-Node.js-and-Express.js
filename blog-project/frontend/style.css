@@ -1,0 +1,145 @@
+/* ============ Shared styles — Blog App ============ */
+:root {
+  --blue: #2563eb;
+  --blue-dark: #1e40af;
+  --red: #dc2626;
+  --green: #16a34a;
+  --gray-bg: #f9fafb;
+  --border: #e5e7eb;
+  --text: #111827;
+  --muted: #6b7280;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  background: var(--gray-bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+h1 { font-size: 1.8rem; margin-bottom: 8px; }
+h2 { font-size: 1.25rem; }
+
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- Nav bar ---------- */
+.topnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 0 14px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+.topnav .brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+.topnav a { font-size: 0.95rem; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.card h3 { margin: 0 0 4px; font-size: 1.1rem; }
+.card h3 a { color: var(--text); }
+.card h3 a:hover { color: var(--blue); }
+
+.meta { color: var(--muted); font-size: 0.85rem; }
+.snippet { color: #374151; margin-top: 8px; }
+
+/* ---------- Category tag ---------- */
+.cat-tag {
+  display: inline-block;
+  background: #eff6ff;
+  color: var(--blue-dark);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  vertical-align: middle;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 7px;
+  border: none;
+  font-size: 0.88rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-view { background: var(--blue); color: #fff; }
+.btn-edit { background: #f59e0b; color: #fff; }
+.btn-delete { background: var(--red); color: #fff; }
+.btn-create { background: var(--green); color: #fff; padding: 10px 18px; }
+.btn:hover { opacity: 0.88; }
+
+/* ---------- Forms ---------- */
+input, textarea, select, button.btn-submit {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: #fff;
+}
+textarea { min-height: 180px; resize: vertical; }
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--blue);
+  border-color: transparent;
+}
+.btn-submit {
+  background: var(--blue);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.btn-submit:hover { background: var(--blue-dark); }
+
+/* ---------- Filters ---------- */
+.filters { display: flex; gap: 10px; margin: 14px 0; }
+.filters input { flex: 1; margin: 0; }
+.filters select { margin: 0; width: auto; }
+
+/* ---------- Messages ---------- */
+#msg p, .alert { padding: 8px 12px; border-radius: 7px; font-size: 0.9rem; }
+.alert-success { background: #dcfce7; color: #14532d; }
+.alert-error { background: #fee2e2; color: #7f1d1d; }
+
+/* ---------- Empty state ---------- */
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 0;
+}
+
+/* ============ Mobile responsiveness ============ */
+@media (max-width: 640px) {
+  body { padding: 16px 12px 40px; }
+  h1 { font-size: 1.4rem; }
+  .card { padding: 14px 16px; }
+  .filters { flex-direction: column; }
+  .filters select { width: 100%; }
+  .topnav { gap: 10px; }
+  .btn { width: 100%; margin-bottom: 6px; text-align: center; }
+  .card .btn { width: auto; margin-right: 6px; }
+}
